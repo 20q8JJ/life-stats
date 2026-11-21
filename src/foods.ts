@@ -240,34 +240,52 @@ Schätze für jedes die Menge in Gramm (bzw. ml) und die Nährwerte für genau d
 Antworte nur mit JSON: {"items":[{"name":"deutscher Name","grams":Zahl,"kcal":Zahl,"protein":Zahl,"fat":Zahl,"carbs":Zahl}]}.
 Wenn eine Verpackung mit Nährwerttabelle zu sehen ist, nutze deren Werte. Wenn kein Essen zu sehen ist, gib {"items":[]} zurück.`
 
-const MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash']
+// Tried in order. When one is overloaded or its free limit is used up, the next one takes over.
+const MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-2.0-flash']
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export async function analyzePhoto(b64: string, key: string, hint?: string): Promise<PhotoGuess[]> {
-  let lastErr = ''
+  let busy = 0, limited = 0, other = ''
   for (const model of MODELS) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key.trim() },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: PROMPT + (hint ? `\nHinweis vom Nutzer: ${hint}` : '') }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
-      }),
-    })
-    if (r.status === 404) { lastErr = 'Modell nicht gefunden'; continue }
-    const j = await r.json().catch(() => ({}))
-    if (!r.ok) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      let r: Response
+      try {
+        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key.trim() },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: PROMPT + (hint ? `\nHinweis vom Nutzer: ${hint}` : '') }, { inline_data: { mime_type: 'image/jpeg', data: b64 } }] }],
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
+          }),
+        })
+      } catch {
+        throw new Error('Keine Verbindung zum Internet. Versuch es gleich nochmal.')
+      }
+      if (r.status === 404) break // model not offered for this key → next model
+      const j = await r.json().catch(() => ({}))
+      if (r.ok) {
+        const text: string = j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''
+        let parsed: unknown
+        try { parsed = JSON.parse(text.replace(/^```json|```$/g, '').trim()) } catch { other = 'Die KI hat keine lesbare Antwort geliefert.'; break }
+        const items = (Array.isArray(parsed) ? parsed : (parsed as { items?: PhotoGuess[] }).items ?? []) as PhotoGuess[]
+        return items.map((x) => ({
+          name: String(x.name ?? 'Essen'), grams: Math.round(Number(x.grams) || 0), kcal: Math.round(Number(x.kcal) || 0),
+          protein: Math.round((Number(x.protein) || 0) * 10) / 10, fat: Math.round((Number(x.fat) || 0) * 10) / 10, carbs: Math.round((Number(x.carbs) || 0) * 10) / 10,
+        }))
+      }
       const msg: string = j?.error?.message ?? `Fehler ${r.status}`
-      if (r.status === 400 && /api key/i.test(msg)) throw new Error('Der API-Schlüssel ist ungültig.')
-      if (r.status === 429) throw new Error('Tageslimit erreicht. Morgen geht es wieder (kostenloses Kontingent).')
-      throw new Error(msg)
+      if ((r.status === 400 || r.status === 403) && /api key|permission|unauthori/i.test(msg)) throw new Error('Der API-Schlüssel ist ungültig. Tippe oben rechts auf „Schlüssel“ und füge ihn neu ein.')
+      if (r.status === 429) { limited++; break } // this model's free limit → next model
+      if (r.status === 503 || r.status === 500 || /overloaded|high demand|unavailable/i.test(msg)) {
+        busy++
+        if (attempt === 0) { await wait(1500); continue } // short pause, same model once more
+        break
+      }
+      other = msg
+      break
     }
-    const text: string = j?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? '').join('') ?? ''
-    const parsed = JSON.parse(text.replace(/^```json|```$/g, '').trim())
-    const items = (Array.isArray(parsed) ? parsed : parsed.items ?? []) as PhotoGuess[]
-    return items.map((x) => ({
-      name: String(x.name ?? 'Essen'), grams: Math.round(Number(x.grams) || 0), kcal: Math.round(Number(x.kcal) || 0),
-      protein: Math.round((Number(x.protein) || 0) * 10) / 10, fat: Math.round((Number(x.fat) || 0) * 10) / 10, carbs: Math.round((Number(x.carbs) || 0) * 10) / 10,
-    }))
   }
-  throw new Error(lastErr || 'Erkennung fehlgeschlagen')
+  if (busy) throw new Error('Googles KI ist gerade überlastet. Das passiert manchmal kurz. Bitte in ein, zwei Minuten nochmal versuchen, oder trag das Essen über die Suche ein.')
+  if (limited) throw new Error('Das kostenlose Kontingent für heute ist aufgebraucht. Morgen geht es wieder, bis dahin hilft die Suche.')
+  throw new Error(other || 'Erkennung hat nicht geklappt. Bitte nochmal versuchen.')
 }
