@@ -462,7 +462,7 @@ export default function Nutrition() {
       <div className="card">
         <div className="rings">
           <Ring value={tot.kcal} goal={t?.kcal ?? 0} color="var(--accent)" label="Kalorien" center={<>{Math.round(tot.kcal)}</>} sub={t ? `von ${t.kcal}` : 'Profil fehlt'} />
-          <Ring value={tot.protein} goal={t?.protein ?? 0} color="var(--ink)" label="Eiweiß" center={<>{Math.round(tot.protein)}g</>} sub={t ? `von ${t.protein} g` : ''} />
+          <Ring value={tot.protein} goal={t?.protein ?? 0} color="var(--protein)" label="Eiweiß" center={<>{Math.round(tot.protein)}g</>} sub={t ? `von ${t.protein} g` : ''} />
           <Ring value={tot.fat} goal={t?.fat ?? 0} color="var(--warn)" label="Fett" center={<>{Math.round(tot.fat)}g</>} sub={t ? `von ${t.fat} g` : ''} />
           <Ring value={tot.carbs} goal={t?.carbs ?? 0} color="var(--good)" label="Kohlenh." center={<>{Math.round(tot.carbs)}g</>} sub={t ? `von ${t.carbs} g` : ''} />
         </div>

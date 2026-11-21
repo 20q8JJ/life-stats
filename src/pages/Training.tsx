@@ -142,7 +142,7 @@ export default function Training() {
                     <XAxis dataKey="d" tickFormatter={(d) => fmtDay(d).slice(4)} stroke="var(--muted)" fontSize={11} minTickGap={20} />
                     <YAxis stroke="var(--muted)" fontSize={11} domain={['auto', 'auto']} />
                     <Tooltip contentStyle={TIP} labelFormatter={(d) => fmtDay(String(d))} formatter={(v) => [String(v).replace('.', ','), 'Bestwert']} />
-                    <Line type="monotone" dataKey="v" stroke="var(--ink)" strokeWidth={3} dot={{ r: 4, fill: 'var(--ink)' }} animationDuration={1200} />
+                    <Line type="monotone" dataKey="v" stroke="var(--area)" strokeWidth={3} dot={{ r: 4, fill: 'var(--area)' }} animationDuration={1200} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

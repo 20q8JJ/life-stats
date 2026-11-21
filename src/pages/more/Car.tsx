@@ -87,7 +87,7 @@ export default function Car() {
                   <XAxis dataKey="m" stroke="var(--muted)" fontSize={11} />
                   <YAxis stroke="var(--muted)" fontSize={11} />
                   <Tooltip contentStyle={TIP} cursor={{ fill: 'var(--card2)' }} formatter={(v) => [`${v} km`, 'Gefahren']} />
-                  <Bar dataKey="km" fill="var(--ink)" radius={0} />
+                  <Bar dataKey="km" fill="var(--area)" radius={0} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

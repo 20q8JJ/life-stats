@@ -37,6 +37,16 @@ const wrap = (C: ComponentType) => C as ComponentType<{ go: Go }>
 
 export const GROUPS = ['Körper & Gesundheit', 'Alltag & Planung', 'Ziele & Wachstum', 'Geld & Besitz', 'Rückblick']
 
+/** One colour per group, used for rules, bars, charts and markers. */
+export const AREA: Record<string, string> = {
+  [GROUPS[0]]: 'var(--c-health)',
+  [GROUPS[1]]: 'var(--c-plan)',
+  [GROUPS[2]]: 'var(--c-growth)',
+  [GROUPS[3]]: 'var(--c-money)',
+  [GROUPS[4]]: 'var(--accent)',
+}
+export const areaOf = (p: Page) => { const m = MODULES.find((x) => x.id === p); return m ? AREA[m.group] : undefined }
+
 export const MODULES: Mod[] = [
   { id: 'nutrition', label: 'Ernährung', ico: '🍽️', desc: 'Foto, Suche, Makros, Wasser', group: GROUPS[0], C: wrap(Nutrition) },
   { id: 'body', label: 'Körper', ico: '⚖️', desc: 'Tanita-Werte & Verlauf', group: GROUPS[0], C: wrap(Body) },

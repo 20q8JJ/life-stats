@@ -54,7 +54,7 @@ export default function Focus() {
             <circle cx="100" cy="100" r={r} fill="none" stroke="var(--hair)" strokeWidth="10" />
             <circle cx="100" cy="100" r={r} fill="none" stroke="url(#fg)" strokeWidth="10" strokeLinecap="round"
               strokeDasharray={c} strokeDashoffset={c * (1 - pct)} style={{ transition: 'stroke-dashoffset .3s linear' }} transform="rotate(-90 100 100)" />
-            <defs><linearGradient id="fg"><stop offset="0" stopColor="var(--accent)" /><stop offset="1" stopColor="var(--ink)" /></linearGradient></defs>
+            <defs><linearGradient id="fg"><stop offset="0" stopColor="var(--accent)" /><stop offset="1" stopColor="var(--area)" /></linearGradient></defs>
           </svg>
           <div className="focus-time">{String(Math.floor(left / 60)).padStart(2, '0')}:{String(left % 60).padStart(2, '0')}</div>
         </div>

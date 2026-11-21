@@ -2,7 +2,8 @@ import { useState } from 'react'
 import Today from './pages/Today'
 import Hub from './pages/Hub'
 import { GameLayer } from './game'
-import { GROUPS, MODULES, type Page } from './modules'
+import { AREA, GROUPS, MODULES, areaOf, type Page } from './modules'
+import type { CSSProperties } from 'react'
 
 export type { Page } from './modules'
 
@@ -27,7 +28,7 @@ export default function App() {
   return (
     <>
       <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
-      <main className="app" key={page}>
+      <main className="app" key={page} data-area={areaOf(page) ? '' : undefined} style={{ '--area': areaOf(page) } as CSSProperties}>
         {page !== 'today' && page !== 'hub' && !BAR.some((b) => b.id === page) && (
           <button className="back" onClick={() => go('hub')}>‹ Alle Bereiche</button>
         )}
@@ -50,7 +51,7 @@ export default function App() {
         <div className="side-logo"><span className="wordmark">Life<span className="slash">/</span>Stats</span></div>
         <button className={page === 'today' ? 'on' : ''} onClick={() => go('today')}><span className="ico">◧</span>Heute</button>
         {GROUPS.map((g) => (
-          <div key={g}>
+          <div key={g} style={{ '--area': AREA[g] } as CSSProperties}>
             <div className="side-group">{g}</div>
             {MODULES.filter((m) => m.group === g).map((m) => (
               <button key={m.id} className={page === m.id ? 'on' : ''} onClick={() => go(m.id)}><span className="ico">{m.ico}</span>{m.label}</button>

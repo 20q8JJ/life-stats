@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { GROUPS, MODULES, SOON, type Go } from '../modules'
+import type { CSSProperties } from 'react'
+import { AREA, GROUPS, MODULES, SOON, type Go } from '../modules'
 
 export default function Hub({ go }: { go: Go }) {
   const [q, setQ] = useState('')
@@ -12,7 +13,7 @@ export default function Hub({ go }: { go: Go }) {
         const mods = MODULES.filter((m) => m.group === g && match(m))
         if (!mods.length) return null
         return (
-          <section key={g} style={{ marginBottom: 18 }}>
+          <section key={g} style={{ marginBottom: 18, '--area': AREA[g] } as CSSProperties}>
             <div className="group-title">{g}</div>
             <div className="hub-grid">
               {mods.map((m) => (

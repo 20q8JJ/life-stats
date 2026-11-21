@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Area, AreaChart, ResponsiveContainer, YAxis } from 'recharts'
 import type { Page } from '../modules'
 import { foodTotals, useLife } from '../life'
@@ -11,6 +12,10 @@ import { sortTodos, TodoRow } from './Todos'
 import { LevelCard } from '../game'
 import { thisWeek, useWorkouts, volume } from '../workouts'
 import { useGratitudeToday } from '../gratitude'
+
+const H = { '--area': 'var(--c-health)' } as CSSProperties
+const P = { '--area': 'var(--c-plan)' } as CSSProperties
+const G = { '--area': 'var(--c-growth)' } as CSSProperties
 
 export default function Today({ go }: { go: (p: Page) => void }) {
   const { body, supplements, taken, profile, todos } = useStore()
@@ -49,17 +54,17 @@ export default function Today({ go }: { go: (p: Page) => void }) {
 
       <div style={{ marginTop: 18 }}><LevelCard onOpen={() => go('achievements')} /></div>
 
-      <div className="card">
+      <div className="card" style={{ '--area': 'var(--accent)' } as CSSProperties}>
         <div className="rings">
           <Ring value={Math.round(eaten.kcal)} goal={t?.kcal ?? 0} color="var(--accent)" label="Kalorien" center={<CountUp value={Math.round(eaten.kcal)} />} sub={t ? `von ${t.kcal}` : 'Profil fehlt'} />
-          <Ring value={Math.round(eaten.protein)} goal={t?.protein ?? 0} color="var(--ink)" label="Eiweiß" center={<><CountUp value={Math.round(eaten.protein)} />g</>} sub={t ? `von ${t.protein} g` : '–'} />
-          <Ring value={suppDone} goal={supplements.length} color="var(--good)" label="Supplements" center={<>{suppDone}/{supplements.length}</>} />
-          <Ring value={doneToday} goal={todoGoal} color="var(--ink)" label="To-dos" center={<>{doneToday}/{todoGoal}</>} />
+          <Ring value={Math.round(eaten.protein)} goal={t?.protein ?? 0} color="var(--protein)" label="Eiweiß" center={<><CountUp value={Math.round(eaten.protein)} />g</>} sub={t ? `von ${t.protein} g` : '–'} />
+          <Ring value={suppDone} goal={supplements.length} color="var(--c-health)" label="Supplements" center={<>{suppDone}/{supplements.length}</>} />
+          <Ring value={doneToday} goal={todoGoal} color="var(--c-plan)" label="To-dos" center={<>{doneToday}/{todoGoal}</>} />
         </div>
       </div>
 
       <div className="tiles">
-        <div className="card" onClick={() => go('body')} style={{ cursor: 'pointer' }}>
+        <div className="card" onClick={() => go('body')} style={{ cursor: 'pointer', ...H }}>
           <div className="row between"><span className="muted small">Gewicht</span><span className="pill">30 Tage</span></div>
           {latest ? (
             <>
@@ -71,12 +76,12 @@ export default function Today({ go }: { go: (p: Page) => void }) {
                     <AreaChart data={weights} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.5} />
-                          <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+                          <stop offset="0%" stopColor="var(--area)" stopOpacity={0.5} />
+                          <stop offset="100%" stopColor="var(--area)" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <YAxis hide domain={['dataMin - 0.5', 'dataMax + 0.5']} />
-                      <Area type="monotone" dataKey="w" stroke="var(--accent)" strokeWidth={2.5} fill="url(#wg)" animationDuration={1400} />
+                      <Area type="monotone" dataKey="w" stroke="var(--area)" strokeWidth={2.5} fill="url(#wg)" animationDuration={1400} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -87,7 +92,7 @@ export default function Today({ go }: { go: (p: Page) => void }) {
           )}
         </div>
 
-        <div className="card" onClick={() => go('body')} style={{ cursor: 'pointer' }}>
+        <div className="card" onClick={() => go('body')} style={{ cursor: 'pointer', ...H }}>
           <div className="row between"><span className="muted small">Körperfett</span><span className="pill">Tanita</span></div>
           {latest?.bodyFat != null ? (
             <>
@@ -109,7 +114,7 @@ export default function Today({ go }: { go: (p: Page) => void }) {
           )}
         </div>
 
-        <div className="card wide" onClick={() => go('training')} style={{ cursor: 'pointer' }}>
+        <div className="card wide" onClick={() => go('training')} style={{ cursor: 'pointer', ...H }}>
           <div className="row between"><span className="muted small">Training</span><span className="pill">Hevy</span></div>
           {lastWo ? (
             <div className="row between wrap" style={{ gap: 12 }}>
@@ -127,18 +132,18 @@ export default function Today({ go }: { go: (p: Page) => void }) {
           )}
         </div>
 
-        <div className="card">
+        <div className="card" style={P}>
           <div className="row between"><h2>Gewohnheiten</h2><button className="link" onClick={() => go('habits')}>Alle ›</button></div>
           <HabitChecklist />
         </div>
 
-        <div className="card">
+        <div className="card" style={P}>
           <div className="row between"><h2>Demnächst</h2><button className="link" onClick={() => go('calendar')}>Termine ›</button></div>
           <UpcomingList limit={4} />
           {!checkedIn && hour >= 18 && <button className="btn ghost" style={{ marginTop: 10, width: '100%' }} onClick={() => go('checkin')}>😴 Abend-Check-in machen</button>}
         </div>
 
-        <div className="card">
+        <div className="card" style={P}>
           <div className="row between"><h2>To-dos heute</h2><button className="link" onClick={() => go('todos')}>Alle ›</button></div>
           {todayTodos.length + doneTodayList.length === 0 ? (
             <div className="empty" style={{ padding: 12 }}>{todos.length ? 'Für heute alles erledigt 🎉' : 'Noch keine To-dos.'}</div>
@@ -147,12 +152,12 @@ export default function Today({ go }: { go: (p: Page) => void }) {
           )}
         </div>
 
-        <div className="card">
+        <div className="card" style={H}>
           <div className="row between"><h2>Supplements</h2><button className="link" onClick={() => go('supps')}>Plan ›</button></div>
           <SupplementChecklist />
         </div>
 
-        <div className="card wide" onClick={() => go('gratitude')} style={{ cursor: 'pointer' }}>
+        <div className="card wide" onClick={() => go('gratitude')} style={{ cursor: 'pointer', ...G }}>
           <div className="row between"><h2>Dankbarkeit 🙏</h2><span className="pill">🔥 {grat.streak} {grat.streak === 1 ? 'Tag' : 'Tage'}</span></div>
           {grat.today?.items.length ? (
             <ul className="gr-tile-items">{grat.today.items.slice(0, 3).map((x, i) => <li key={i}>{x}</li>)}</ul>

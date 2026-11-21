@@ -145,8 +145,8 @@ export default function Body() {
                   labelFormatter={(d) => fmtDate(String(d))}
                   formatter={(v, n) => [`${String(v).replace('.', ',')} ${m.unit}`, n === 'trend' ? 'Trend' : m.label]}
                 />
-                <Line isAnimationActive={false} type="monotone" dataKey="value" stroke="var(--accent)" strokeOpacity={0.45} dot={{ r: 2 }} strokeWidth={1.5} />
-                <Line isAnimationActive={false} type="monotone" dataKey="trend" stroke="var(--accent)" dot={false} strokeWidth={3} />
+                <Line isAnimationActive={false} type="monotone" dataKey="value" stroke="var(--area)" strokeOpacity={0.45} dot={{ r: 2 }} strokeWidth={1.5} />
+                <Line isAnimationActive={false} type="monotone" dataKey="trend" stroke="var(--area)" dot={false} strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           </div>

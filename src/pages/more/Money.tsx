@@ -6,7 +6,7 @@ import { euro, fmtDate, monthlySubs, num, useLife } from '../../life'
 import { todayStr } from '../../store'
 
 const CATS = ['Essen', 'Einkauf', 'Freizeit', 'Auto', 'Wohnen', 'Fitness', 'Kleidung', 'Sonstiges']
-const COLORS = ['var(--accent)', 'var(--ink)', 'var(--muted)', 'var(--good)', 'var(--warn)', 'var(--bad)', 'var(--hair)', 'color-mix(in srgb, var(--accent) 45%, transparent)']
+const COLORS = ['var(--c-money)', 'var(--c-plan)', 'var(--c-health)', 'var(--c-growth)', 'var(--accent)', 'var(--bad)', 'var(--muted)', 'var(--warn)']
 
 export default function Money() {
   const { txs, subs, budget, add, remove, set } = useLife()
