@@ -1,0 +1,216 @@
+<title>Life App Designrichtungen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600&family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;600&family=Barlow+Condensed:wght@500;700&family=Caveat:wght@500;700&family=Patrick+Hand&family=Lilita+One&family=Nunito:wght@600;800&family=Instrument+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: page = neutral gallery wall; each direction is a phone-sized frame in its own world */
+:root { --bg: #f3f3f1; --fg: #1b1c1f; --muted: #6a6d74; --line: #dcdcd8; --ui: 'Instrument Sans', system-ui, sans-serif; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141518; --fg: #ececea; --muted: #9a9ca3; --line: #2a2c31; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #141518; --fg: #ececea; --muted: #9a9ca3; --line: #2a2c31; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--ui); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 48px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+h1 { font-size: clamp(26px, 4vw, 38px); margin: 0 0 6px; text-wrap: balance; letter-spacing: -0.02em; }
+.lead { color: var(--muted); max-width: 62ch; margin: 0 0 28px; line-height: 1.5; }
+.gallery { display: grid; gap: 28px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+figure { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+figcaption b { font-size: 17px; display: block; }
+figcaption span { color: var(--muted); font-size: 14px; line-height: 1.45; }
+.num { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--fg); font-size: 12px; margin-right: 6px; vertical-align: 2px; }
+.phone { width: 100%; max-width: 360px; aspect-ratio: 9 / 16.5; border-radius: 30px; overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.18); border: 1px solid var(--line); }
+.phone .in { position: absolute; inset: 0; overflow: auto; padding: 22px 18px; }
+.chk { cursor: pointer; user-select: none; }
+
+/* 1 Werkstatt — Swiss poster, grid, one signal colour */
+.s1 { background: #e7e8ea; color: #111; font-family: 'Archivo', sans-serif; }
+.s1 .top { display: flex; justify-content: space-between; border-bottom: 3px solid #111; padding-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; }
+.s1 .lv { font-family: 'Archivo Black'; font-size: 96px; line-height: .85; margin: 14px 0 4px; letter-spacing: -0.05em; }
+.s1 .lv small { font-size: 14px; letter-spacing: 0; vertical-align: top; color: #ff4a1c; }
+.s1 .xp { height: 14px; border: 2px solid #111; } .s1 .xp div { height: 100%; width: 62%; background: #ff4a1c; }
+.s1 .grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 2px solid #111; margin-top: 18px; }
+.s1 .grid > div { padding: 10px 0; border-bottom: 2px solid #111; } .s1 .grid > div:nth-child(odd) { border-right: 2px solid #111; padding-right: 10px; } .s1 .grid > div:nth-child(even) { padding-left: 10px; }
+.s1 .k { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; } .s1 .v { font-family: 'Archivo Black'; font-size: 30px; }
+.s1 .row { display: flex; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid #111; font-weight: 600; }
+.s1 .bx { width: 18px; height: 18px; border: 2px solid #111; } .s1 .done .bx { background: #111; } .s1 .done { text-decoration: line-through; color: #777; }
+.s1 h3 { font-family: 'Archivo Black'; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; margin: 18px 0 2px; }
+
+/* 2 Pixel-Quest — retro game HUD */
+.s2 { background: #22203a; color: #f4ecd8; font-family: 'VT323', monospace; font-size: 22px; image-rendering: pixelated; }
+.s2 .hud { background: #3b3660; border: 4px solid #0e0c1c; box-shadow: inset -4px -4px 0 #2a2648, inset 4px 4px 0 #5a5390; padding: 10px; }
+.s2 .t { font-family: 'Press Start 2P'; font-size: 10px; color: #ffd84a; }
+.s2 .lvl { font-family: 'Press Start 2P'; font-size: 22px; color: #7ee36b; text-shadow: 3px 3px 0 #0e0c1c; margin: 8px 0; }
+.s2 .seg { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; } .s2 .seg i { height: 12px; background: #0e0c1c; } .s2 .seg i.on { background: #7ee36b; box-shadow: inset 0 -3px 0 #3f9e38; }
+.s2 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.s2 .tile { background: #2d2a4c; border: 4px solid #0e0c1c; padding: 8px; } .s2 .tile b { font-family: 'Press Start 2P'; font-size: 14px; display: block; margin-top: 6px; color: #fff; }
+.s2 .q { display: flex; gap: 10px; align-items: center; padding: 4px 0; } .s2 .bx { width: 18px; height: 18px; border: 3px solid #f4ecd8; flex: none; } .s2 .done .bx { background: #ffd84a; border-color: #ffd84a; } .s2 .done { color: #8f88b8; }
+.s2 .coin { color: #ffd84a; }
+
+/* 3 Cockpit — instrument panel */
+.s3 { background: #10141a; color: #d9dde3; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.s3 .lbl { font-family: 'Barlow Condensed'; text-transform: uppercase; letter-spacing: .18em; font-size: 11px; color: #7f8a99; }
+.s3 .panel { border: 1px solid #2a323d; padding: 12px; margin-bottom: 10px; position: relative; }
+.s3 .panel::before, .s3 .panel::after { content: ''; position: absolute; width: 8px; height: 8px; border-color: #ffb000; border-style: solid; }
+.s3 .panel::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; } .s3 .panel::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+.s3 .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.s3 svg { width: 100%; height: auto; display: block; }
+.s3 .big { font-family: 'Barlow Condensed'; font-weight: 700; font-size: 40px; color: #ffb000; line-height: 1; }
+.s3 .ticks { height: 10px; background: repeating-linear-gradient(90deg, #2a323d 0 1px, transparent 1px 8px); margin-top: 6px; position: relative; }
+.s3 .ticks div { position: absolute; inset: 0 38% 0 0; background: repeating-linear-gradient(90deg, #ffb000 0 1px, transparent 1px 8px); }
+.s3 .r { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #2a323d; } .s3 .done { color: #5b6573; } .s3 .done .st { color: #4fd18b; }
+
+/* 4 Notizbuch — handmade journal */
+.s4 { background: #f7f5ef radial-gradient(#c9c5ba 1px, transparent 1.2px) 0 0 / 18px 18px; color: #1f3a8a; font-family: 'Patrick Hand', cursive; font-size: 18px; }
+.s4 h2 { font-family: 'Caveat'; font-size: 40px; margin: 0; line-height: 1; color: #16245a; }
+.s4 .hl { background: linear-gradient(transparent 55%, #ffe76a 55%); padding: 0 4px; }
+.s4 .note { background: #fff7b8; padding: 12px; box-shadow: 2px 4px 10px rgba(0,0,0,.12); transform: rotate(-1.5deg); margin: 14px 4px; }
+.s4 .note.b { background: #d9f0ff; transform: rotate(1.2deg); }
+.s4 .xp { border: 2px solid #1f3a8a; border-radius: 12px 4px 10px 6px; height: 16px; overflow: hidden; } .s4 .xp div { height: 100%; width: 62%; background: repeating-linear-gradient(-45deg, #1f3a8a 0 3px, transparent 3px 7px); }
+.s4 .r { display: flex; gap: 10px; align-items: center; padding: 3px 0; } .s4 .bx { width: 18px; height: 18px; border: 2px solid #1f3a8a; border-radius: 3px 6px 4px 5px; display: grid; place-items: center; font-family: 'Caveat'; font-size: 22px; line-height: 0; color: #d6336c; }
+.s4 .done span:last-child { text-decoration: line-through wavy #d6336c; color: #6b7bb5; }
+.s4 .stamp { display: inline-block; border: 3px solid #d6336c; color: #d6336c; font-family: 'Caveat'; font-weight: 700; font-size: 22px; padding: 0 10px; transform: rotate(-8deg); border-radius: 6px; margin-top: 8px; }
+
+/* 5 Clan-Burg — chunky cartoon, 3D buttons */
+.s5 { background: linear-gradient(180deg, #5fb8f5 0%, #8fd3ff 45%, #7fc55a 45.2%, #5aa53c 100%); color: #3a2410; font-family: 'Nunito', sans-serif; font-weight: 800; }
+.s5 .bar { display: flex; align-items: center; gap: 8px; background: #3a2a1a; border: 3px solid #1e140a; border-radius: 14px; padding: 6px; color: #fff; }
+.s5 .shield { width: 46px; height: 50px; background: #4a7bff; border: 3px solid #1e140a; border-radius: 10px 10px 22px 22px; display: grid; place-items: center; font-family: 'Lilita One'; font-size: 24px; color: #fff; text-shadow: 0 2px 0 #1e140a; flex: none; }
+.s5 .xpb { flex: 1; height: 18px; background: #1e140a; border-radius: 9px; overflow: hidden; } .s5 .xpb div { height: 100%; width: 62%; background: linear-gradient(#b8f05a, #6fc22a); border-radius: 9px; box-shadow: inset 0 -4px 0 rgba(0,0,0,.15); }
+.s5 .wood { background: linear-gradient(#d9a066, #b97a40); border: 3px solid #1e140a; border-radius: 16px; padding: 12px; margin-top: 12px; box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 5px 0 #1e140a; }
+.s5 .stone { background: linear-gradient(#e9e4dc, #c9c1b4); }
+.s5 .title { font-family: 'Lilita One'; font-size: 20px; color: #fff; text-shadow: 0 2px 0 #1e140a, 2px 0 0 #1e140a, -2px 0 0 #1e140a, 0 -2px 0 #1e140a; }
+.s5 .tw { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; } .s5 .tw div { background: rgba(255,255,255,.55); border: 2px solid #1e140a; border-radius: 10px; padding: 6px 8px; font-size: 12px; } .s5 .tw b { font-family: 'Lilita One'; font-size: 22px; display: block; font-weight: 400; }
+.s5 .r { display: flex; align-items: center; gap: 10px; padding: 5px 0; } .s5 .bx { width: 24px; height: 24px; border: 3px solid #1e140a; border-radius: 8px; background: #fff; display: grid; place-items: center; color: #fff; font-size: 14px; } .s5 .done .bx { background: #4cc43a; } .s5 .done { opacity: .6; }
+.s5 .btn3d { display: block; width: 100%; margin-top: 12px; font-family: 'Lilita One'; font-size: 20px; color: #fff; background: linear-gradient(#7fe04e, #3fae2a); border: 3px solid #1e140a; border-radius: 14px; padding: 8px; box-shadow: 0 5px 0 #1e140a; text-shadow: 0 2px 0 #1e140a; cursor: pointer; }
+.s5 .btn3d:active { transform: translateY(4px); box-shadow: 0 1px 0 #1e140a; }
+
+.qs { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; max-width: 70ch; }
+.qs h2 { font-size: 20px; margin: 0 0 10px; } .qs ol { padding-left: 20px; line-height: 1.7; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <h1>Fünf Richtungen für deine App</h1>
+  <p class="lead">Gleicher Inhalt, fünf ganz verschiedene Welten. Tipp die Kästchen an, sie reagieren. Sag mir eine Nummer, oder mische: „Farben von 2, Schrift von 5“.</p>
+
+  <div class="gallery">
+    <figure>
+      <div class="phone s1"><div class="in">
+        <div class="top"><span>Samstag 21.11.</span><span>Woche 47</span></div>
+        <div class="lv">12<small> LVL</small></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px"><span>GEWOHNHEITS-BAUER</span><span>620 / 1000 XP</span></div>
+        <div class="xp"><div></div></div>
+        <div class="grid">
+          <div><div class="k">Gewicht</div><div class="v">81,6</div></div>
+          <div><div class="k">Eiweiß</div><div class="v">120<span style="font-size:14px">/163</span></div></div>
+          <div><div class="k">Streak</div><div class="v">9 T</div></div>
+          <div><div class="k">Workouts</div><div class="v">3/4</div></div>
+        </div>
+        <h3>Heute</h3>
+        <div class="row chk done"><span class="bx"></span>Kreatin 5 g</div>
+        <div class="row chk"><span class="bx"></span>Wocheneinkauf</div>
+        <div class="row chk"><span class="bx"></span>Handstand 3 × 40 s</div>
+      </div></div>
+      <figcaption><b><span class="num">1</span>Werkstatt</b><span>Wie ein Schweizer Plakat: riesige Zahlen, harte Linien, nur Schwarz und ein Signal-Orange. Erwachsen, klar, sehr eigen.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone s2"><div class="in">
+        <div class="hud">
+          <div class="t">SPIELER J</div>
+          <div class="lvl">LV 12</div>
+          <div class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div style="font-size:18px;margin-top:6px">620 / 1000 XP <span class="coin">◆ 9 Tage Streak</span></div>
+        </div>
+        <div class="tiles">
+          <div class="tile">GEWICHT<b>81.6KG</b></div>
+          <div class="tile">EIWEISS<b>120/163</b></div>
+        </div>
+        <div class="hud">
+          <div class="t" style="margin-bottom:6px">TAGESQUESTS</div>
+          <div class="q chk done"><span class="bx"></span>Kreatin nehmen <span class="coin">+5</span></div>
+          <div class="q chk"><span class="bx"></span>Wocheneinkauf <span class="coin">+10</span></div>
+          <div class="q chk"><span class="bx"></span>Handstand-Training <span class="coin">+50</span></div>
+        </div>
+      </div></div>
+      <figcaption><b><span class="num">2</span>Pixel-Quest</b><span>Retro-Videospiel: Pixelschrift, Level-Leiste aus Blöcken, Aufgaben heißen „Quests“ und zeigen ihre XP. Passt zu Minecraft.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone s3"><div class="in">
+        <div style="display:flex;justify-content:space-between" class="lbl"><span>SYS · 21.11.26</span><span style="color:#ffb000">● ONLINE</span></div>
+        <div class="panel" style="margin-top:10px">
+          <div class="lbl">Level</div>
+          <div style="display:flex;align-items:baseline;gap:10px"><span class="big">12</span><span>620/1000 XP</span></div>
+          <div class="ticks"><div></div></div>
+        </div>
+        <div class="gauges">
+          <div class="panel"><div class="lbl">Eiweiß</div>
+            <svg viewBox="0 0 100 60"><path d="M10 55 A40 40 0 0 1 90 55" fill="none" stroke="#2a323d" stroke-width="6"/><path d="M10 55 A40 40 0 0 1 80 28" fill="none" stroke="#ffb000" stroke-width="6"/><text x="50" y="52" text-anchor="middle" fill="#d9dde3" font-size="14" font-family="JetBrains Mono">120g</text></svg>
+          </div>
+          <div class="panel"><div class="lbl">Gewicht</div><div class="big" style="font-size:30px;margin-top:8px">81.6</div><div class="lbl" style="color:#4fd18b">▼ 0.8 / 30T</div></div>
+        </div>
+        <div class="panel">
+          <div class="lbl" style="margin-bottom:4px">Checkliste</div>
+          <div class="r chk done"><span>KREATIN_5G</span><span class="st">[OK]</span></div>
+          <div class="r chk"><span>WOCHENEINKAUF</span><span class="st">[ ]</span></div>
+          <div class="r chk"><span>HANDSTAND_3X40</span><span class="st">[ ]</span></div>
+        </div>
+      </div></div>
+      <figcaption><b><span class="num">3</span>Cockpit</b><span>Instrumententafel: Anzeigen wie im Flugzeug, Bernstein auf Dunkelgrau, Code-Schrift. Technisch und präzise, für Zahlen-Fans.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone s4"><div class="in">
+        <h2>Samstag ✿</h2>
+        <div style="font-size:16px">Level 12 · <span class="hl">Gewohnheits-Bauer</span></div>
+        <div class="xp" style="margin-top:8px"><div></div></div>
+        <div class="note"><div style="font-family:Caveat;font-size:24px">81,6 kg ↓</div><div style="font-size:15px">0,8 kg weniger als vor 30 Tagen</div></div>
+        <div class="note b"><div style="font-family:Caveat;font-size:24px">Eiweiß 120 / 163 g</div><div style="font-size:15px">noch ein Skyr heute Abend!</div></div>
+        <div class="r chk done"><span class="bx">✓</span><span>Kreatin 5 g</span></div>
+        <div class="r chk"><span class="bx"></span><span>Wocheneinkauf</span></div>
+        <div class="r chk"><span class="bx"></span><span>Handstand 3 × 40 s</span></div>
+        <div class="stamp">9 TAGE AM STÜCK!</div>
+      </div></div>
+      <figcaption><b><span class="num">4</span>Notizbuch</b><span>Wie ein persönliches Bullet Journal: Handschrift, Klebezettel, Textmarker, Stempel für Erfolge. Warm und wirklich „selbstgemacht“.</span></figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone s5"><div class="in">
+        <div class="bar"><div class="shield">12</div><div style="flex:1"><div style="font-size:12px">Gewohnheits-Bauer</div><div class="xpb"><div></div></div></div><div style="font-family:'Lilita One';font-size:16px;color:#ffd84a">🔥9</div></div>
+        <div class="wood">
+          <div class="title">Deine Werte</div>
+          <div class="tw"><div>Gewicht<b>81,6 kg</b></div><div>Eiweiß<b>120/163</b></div></div>
+        </div>
+        <div class="wood stone">
+          <div class="title">Aufträge heute</div>
+          <div class="r chk done"><span class="bx">✓</span>Kreatin 5 g</div>
+          <div class="r chk"><span class="bx"></span>Wocheneinkauf</div>
+          <div class="r chk"><span class="bx"></span>Handstand 3 × 40 s</div>
+        </div>
+        <button class="btn3d">Training starten</button>
+      </div></div>
+      <figcaption><b><span class="num">5</span>Clan-Burg</b><span>Bunt und verspielt wie ein Strategiespiel: Holz- und Stein-Tafeln, dicke 3D-Knöpfe, Wappen fürs Level. Macht Laune, ist aber laut.</span></figcaption>
+    </figure>
+  </div>
+
+  <div class="qs">
+    <h2>Fünf kurze Fragen</h2>
+    <ol>
+      <li>Welche Nummer gefällt dir am besten, oder was willst du mischen?</li>
+      <li>Hell, dunkel oder beides (automatisch nach Uhrzeit)?</li>
+      <li>Hast du Lieblingsfarben, oder Farben, die gar nicht gehen?</li>
+      <li>Soll die App einen eigenen Namen bekommen statt „Life“? Hast du eine Idee?</li>
+      <li>Drei Wörter, wie sie sich anfühlen soll (z. B. „ruhig, edel, motivierend“)?</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.chk').forEach(function (el) {
+  el.addEventListener('click', function () {
+    el.classList.toggle('done');
+    var bx = el.querySelector('.bx');
+    if (bx && (el.closest('.s4') || el.closest('.s5'))) bx.textContent = el.classList.contains('done') ? '✓' : '';
+    var st = el.querySelector('.st');
+    if (st) st.textContent = el.classList.contains('done') ? '[OK]' : '[ ]';
+  });
+});
+</script>
