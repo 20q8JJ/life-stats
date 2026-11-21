@@ -99,17 +99,26 @@ const schedule = () => {
   timer = setTimeout(syncNow, 2000)
 }
 
-export async function sendLoginLink(email: string) {
+const de = (m: string) =>
+  /invalid login/i.test(m) ? 'E-Mail oder Passwort stimmt nicht.' :
+  /not confirmed/i.test(m) ? 'Bitte bestätige zuerst den Link in der E-Mail von Supabase.' :
+  /already registered/i.test(m) ? 'Für diese E-Mail gibt es schon ein Konto. Melde dich einfach an.' :
+  /at least 6/i.test(m) ? 'Das Passwort braucht mindestens 6 Zeichen.' :
+  /signups? not allowed|disabled/i.test(m) ? 'Neue Konten sind gesperrt. Melde dich mit deinem bestehenden Konto an.' :
+  /rate limit/i.test(m) ? 'Zu viele Versuche. Warte ein paar Minuten.' : m
+
+/** Create the account. Returns true when Supabase wants the e-mail confirmed first. */
+export async function signUp(email: string, password: string) {
   if (!sb) throw new Error('Sync ist noch nicht eingerichtet.')
-  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } })
-  if (error) throw error
+  const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } })
+  if (error) throw new Error(de(error.message))
+  return !data.session
 }
 
-/** 6-digit code from the same e-mail; needed on iPhone, where the link opens Safari instead of the installed app. */
-export async function verifyCode(email: string, token: string) {
+export async function signIn(email: string, password: string) {
   if (!sb) throw new Error('Sync ist noch nicht eingerichtet.')
-  const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' })
-  if (error) throw error
+  const { error } = await sb.auth.signInWithPassword({ email, password })
+  if (error) throw new Error(de(error.message))
 }
 
 export async function signOut() {

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ACCENTS, useSettings, type Mode } from '../theme'
-import { sendLoginLink, signOut, syncConfigured, syncNow, useSync, verifyCode } from '../sync'
+import { signIn, signOut, signUp, syncConfigured, syncNow, useSync } from '../sync'
 
 const MODES: { id: Mode; label: string }[] = [
   { id: 'light', label: 'Hell' },
@@ -63,8 +63,10 @@ export default function Settings() {
 function SyncCard() {
   const { status, email, lastSync, error } = useSync()
   const [mail, setMail] = useState('')
-  const [sent, setSent] = useState(false)
-  const [code, setCode] = useState('')
+  const [pw, setPw] = useState('')
+  const [isNew, setIsNew] = useState(false)
+  const [confirm, setConfirm] = useState(false)
+  const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   if (!syncConfigured()) {
     return (
@@ -75,6 +77,14 @@ function SyncCard() {
     )
   }
   const signedIn = status !== 'signed-out'
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault(); setErr(''); setBusy(true)
+    try {
+      if (isNew) { if (await signUp(mail.trim(), pw)) setConfirm(true) }
+      else await signIn(mail.trim(), pw)
+    } catch (x) { setErr(x instanceof Error ? x.message : 'Hat nicht geklappt') }
+    setBusy(false)
+  }
   return (
     <section className="card">
       <div className="row between"><h2>Konto & Sync</h2>{signedIn && <span className="pill">{status === 'syncing' ? 'Sync …' : status === 'error' ? 'Fehler' : 'Aktiv'}</span>}</div>
@@ -88,31 +98,23 @@ function SyncCard() {
             <button className="btn ghost" onClick={() => signOut()}>Abmelden</button>
           </div>
         </>
-      ) : sent ? (
+      ) : confirm ? (
         <>
-          <p className="small">E-Mail an <b>{mail}</b> ist unterwegs. Gib den Code daraus hier ein (oder tippe am PC einfach auf den Link). Schau notfalls im Spam-Ordner nach.</p>
-          <form className="todo-add" onSubmit={async (e) => {
-            e.preventDefault(); setErr('')
-            try { await verifyCode(mail.trim(), code.trim()) } catch (x) { setErr(x instanceof Error ? x.message : 'Code passt nicht') }
-          }}>
-            <div className="field" style={{ flex: 1 }}>
-              <label htmlFor="sync-code">Code aus der E-Mail</label>
-              <input id="sync-code" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="123456" />
-            </div>
-            <button className="btn">Anmelden</button>
-          </form>
-          <button className="link" style={{ marginTop: 10 }} onClick={() => { setSent(false); setCode('') }}>Andere E-Mail</button>
+          <p className="small">Fast geschafft: Supabase hat dir eine E-Mail an <b>{mail}</b> geschickt. Tippe dort auf den Bestätigungs-Link (egal in welchem Browser), komm dann hierher zurück und melde dich an. Schau notfalls im Spam-Ordner nach.</p>
+          <button className="btn" onClick={() => { setConfirm(false); setIsNew(false) }}>Zur Anmeldung</button>
         </>
       ) : (
-        <form className="todo-add" onSubmit={async (e) => {
-          e.preventDefault(); setErr('')
-          try { await sendLoginLink(mail.trim()); setSent(true) } catch (x) { setErr(x instanceof Error ? x.message : 'Hat nicht geklappt') }
-        }}>
-          <div className="field" style={{ flex: 1 }}>
-            <label htmlFor="sync-mail">E-Mail für die Anmeldung</label>
-            <input id="sync-mail" type="email" required value={mail} onChange={(e) => setMail(e.target.value)} placeholder="du@beispiel.de" />
+        <form onSubmit={submit}>
+          <div className="tabs">
+            <button type="button" className={'chip' + (!isNew ? ' on' : '')} onClick={() => setIsNew(false)}>Anmelden</button>
+            <button type="button" className={'chip' + (isNew ? ' on' : '')} onClick={() => setIsNew(true)}>Konto erstellen</button>
           </div>
-          <button className="btn">Link senden</button>
+          <div className="form-grid">
+            <div className="field"><label htmlFor="sync-mail">E-Mail</label><input id="sync-mail" type="email" autoComplete="email" required value={mail} onChange={(e) => setMail(e.target.value)} /></div>
+            <div className="field"><label htmlFor="sync-pw">Passwort</label><input id="sync-pw" type="password" autoComplete={isNew ? 'new-password' : 'current-password'} required minLength={6} value={pw} onChange={(e) => setPw(e.target.value)} /></div>
+          </div>
+          <button className="btn" disabled={busy}>{busy ? '…' : isNew ? 'Konto erstellen' : 'Anmelden'}</button>
+          {isNew && <p className="muted small">Einmalig. Auf dem zweiten Gerät meldest du dich dann einfach an.</p>}
         </form>
       )}
       {err && <p className="small" style={{ color: 'var(--bad)' }}>{err}</p>}
