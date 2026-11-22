@@ -345,3 +345,12 @@ nav.side button.on { background: var(--area, var(--ink)); color: var(--on-area);
 .grid { border-top-color: var(--area, var(--ink)); border-top-width: 2px; }
 .hub-tile { background: color-mix(in srgb, var(--area, transparent) 7%, transparent); border-top: 3px solid var(--area, transparent); }
 .hub-grid { gap: 0; }
+
+/* Volleyball: muscle groups with load bars */
+.vb-muscles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.vb-muscle { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border: 2px solid var(--hair); background: transparent; color: var(--muted); font: inherit; font-size: 12px; text-align: left; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+.vb-muscle.on { border-color: var(--ink); color: var(--ink); }
+.vb-muscle:hover { background: var(--card2); }
+.vb-load { display: inline-flex; gap: 2px; flex-shrink: 0; }
+.vb-load i { width: 5px; height: 12px; background: var(--hair); }
+.vb-muscle.on .vb-load i.f { background: var(--area, var(--accent)); }

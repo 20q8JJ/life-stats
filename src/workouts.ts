@@ -4,7 +4,39 @@ import { uid } from './store'
 
 export type WSet = { kg?: number; reps?: number; secs?: number; warmup?: boolean }
 export type Exercise = { name: string; sets: WSet[] }
-export type Workout = { id: string; title: string; date: string /* ISO local datetime */; url?: string; exercises: Exercise[] }
+/** A sport session logged by hand (e.g. volleyball) instead of an exercise list from Hevy. */
+export type SportLog = {
+  kind: 'volleyball'
+  mode: 'training' | 'match'
+  minutes?: number
+  sets?: number
+  games?: number
+  muscles: string[]
+  note?: string
+}
+export type Workout = { id: string; title: string; date: string /* ISO local datetime */; url?: string; exercises: Exercise[]; sport?: SportLog }
+
+/** Muscle groups volleyball works, with how hard (3 = stark, 2 = mittel, 1 = leicht). */
+export const VOLLEYBALL_MUSCLES: { name: string; load: 1 | 2 | 3; why: string }[] = [
+  { name: 'Oberschenkel', load: 3, why: 'Sprünge, Block, tiefe Annahme' },
+  { name: 'Waden', load: 3, why: 'Absprung, schnelle Schritte' },
+  { name: 'Gesäß', load: 3, why: 'Sprungkraft, Bereitschaftsstellung' },
+  { name: 'Schultern', load: 3, why: 'Angriff, Aufschlag, Block' },
+  { name: 'Core', load: 2, why: 'Rotation beim Schlag, Stabilität in der Luft' },
+  { name: 'Oberer Rücken', load: 2, why: 'Ausholen beim Angriff' },
+  { name: 'Brust', load: 1, why: 'Schlagbewegung' },
+  { name: 'Arme', load: 2, why: 'Pritschen, Baggern, Schlag' },
+  { name: 'Unterarme & Hände', load: 1, why: 'Pritschen, Handgelenk beim Schlag' },
+]
+export const loadLabel = { 1: 'leicht', 2: 'mittel', 3: 'stark' } as const
+
+export function sportSummary(s: SportLog) {
+  const parts: string[] = []
+  if (s.minutes) parts.push(s.minutes >= 60 ? `${Math.floor(s.minutes / 60)}:${z(s.minutes % 60)} h` : `${s.minutes} min`)
+  if (s.sets) parts.push(`${s.sets} ${s.sets === 1 ? 'Satz' : 'Sätze'}`)
+  if (s.games) parts.push(`${s.games} ${s.games === 1 ? 'Spiel' : 'Spiele'}`)
+  return parts.join(' · ')
+}
 
 type WState = {
   workouts: Workout[]
