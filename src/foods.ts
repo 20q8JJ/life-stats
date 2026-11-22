@@ -176,7 +176,7 @@ export const scale = (m: Macros, grams: number): Macros => {
 /* ---------- Open Food Facts (free, no key) ---------- */
 
 type OffProduct = {
-  product_name?: string; product_name_de?: string; brands?: string; serving_quantity?: number | string; serving_size?: string
+  product_name?: string; product_name_de?: string; brands?: string | string[]; serving_quantity?: number | string; serving_size?: string
   nutriments?: Record<string, number | string | undefined>
 }
 
@@ -189,7 +189,7 @@ function fromOff(p: OffProduct): FoodItem | undefined {
   if (!name || !kcal) return
   const portion = Number(p.serving_quantity) || undefined
   return {
-    name, brand: p.brands?.split(',')[0]?.trim(), source: 'off',
+    name, brand: (Array.isArray(p.brands) ? p.brands[0] : p.brands?.split(',')[0])?.trim() || undefined, source: 'off',
     per100: { kcal: Math.round(kcal), protein: v('proteins_100g'), fat: v('fat_100g'), carbs: v('carbohydrates_100g') },
     portion, portionLabel: portion ? p.serving_size || '1 Portion' : undefined,
   }
@@ -197,19 +197,55 @@ function fromOff(p: OffProduct): FoodItem | undefined {
 
 const OFF_FIELDS = 'product_name,product_name_de,brands,serving_quantity,serving_size,nutriments'
 
+/** fetch JSON with a timeout, so a slow database never leaves the screen hanging. */
+async function getJson(url: string, ms = 7000, outer?: AbortSignal) {
+  const c = new AbortController()
+  const t = setTimeout(() => c.abort(), ms)
+  const stop = () => c.abort()
+  outer?.addEventListener('abort', stop)
+  try {
+    const r = await fetch(url, { signal: c.signal })
+    if (!r.ok) throw new Error(`HTTP ${r.status}`)
+    return await r.json()
+  } finally {
+    clearTimeout(t)
+    outer?.removeEventListener('abort', stop)
+  }
+}
+
 export async function offBarcode(code: string): Promise<FoodItem | undefined> {
-  const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code.trim())}.json?fields=${OFF_FIELDS}`)
-  if (!r.ok) return
-  const j = await r.json()
+  const j = await getJson(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code.trim())}.json?fields=${OFF_FIELDS}`)
   return j.status === 1 && j.product ? fromOff(j.product) : undefined
 }
 
-export async function offSearch(q: string): Promise<FoodItem[]> {
-  const url = `https://de.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=15&fields=${OFF_FIELDS}`
-  const r = await fetch(url)
-  if (!r.ok) throw new Error('Open Food Facts nicht erreichbar')
-  const j = await r.json()
-  return ((j.products ?? []) as OffProduct[]).map(fromOff).filter((x): x is FoodItem => !!x)
+const offCache = new Map<string, FoodItem[]>()
+
+/** Brand products. Uses the fast new search service and falls back to the classic one.
+    Throws only when both fail; callers treat that as "no brand results". */
+export async function offSearch(q: string, signal?: AbortSignal): Promise<FoodItem[]> {
+  const key = q.trim().toLowerCase()
+  const hit = offCache.get(key)
+  if (hit) return hit
+  const enc = encodeURIComponent(q.trim())
+  let products: OffProduct[]
+  try {
+    const j = await getJson(`https://search.openfoodfacts.org/search?q=${enc}&langs=de&page_size=15&fields=${OFF_FIELDS}`, 6000, signal)
+    products = j.hits ?? []
+  } catch (e) {
+    if (signal?.aborted) throw e
+    const j = await getJson(`https://de.openfoodfacts.org/cgi/search.pl?search_terms=${enc}&search_simple=1&action=process&json=1&page_size=15&fields=${OFF_FIELDS}`, 8000, signal)
+    products = j.products ?? []
+  }
+  const seen = new Set<string>()
+  const res = products.map(fromOff).filter((x): x is FoodItem => {
+    if (!x) return false
+    const k = (x.name + x.brand).toLowerCase()
+    if (seen.has(k)) return false
+    seen.add(k)
+    return true
+  })
+  offCache.set(key, res)
+  return res
 }
 
 /* ---------- Photo recognition (Google Gemini) ---------- */

@@ -345,3 +345,33 @@ nav.side button.on { background: var(--area, var(--ink)); color: var(--on-area);
 .grid { border-top-color: var(--area, var(--ink)); border-top-width: 2px; }
 .hub-tile { background: color-mix(in srgb, var(--area, transparent) 7%, transparent); border-top: 3px solid var(--area, transparent); }
 .hub-grid { gap: 0; }
+
+/* Nutrition entry: one search field first, everything else on demand */
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.searchbar { display: flex; align-items: center; border: 2px solid var(--ink); background: var(--paper); transition: border-color .15s; }
+.searchbar:focus-within { border-color: var(--area, var(--accent)); }
+.searchbar-ico { padding: 0 4px 0 12px; font-size: 20px; color: var(--muted); }
+.searchbar input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 14px 8px; font-size: 17px; color: var(--ink); }
+.searchbar input:focus { outline: none; }
+.searchbar-btn { flex: none; width: 50px; align-self: stretch; border: 0; border-left: 2px solid var(--ink); background: transparent; color: var(--ink); font-size: 18px; cursor: pointer; transition: background .15s; }
+.searchbar-btn:hover, .searchbar-btn.on { background: var(--card2); }
+.panel { margin-top: 10px; padding: 14px; border: 2px solid var(--ink); border-left: 8px solid var(--area, var(--accent)); animation: rise .2s both; }
+.entry-card .panel:first-of-type { margin-top: 0; }
+.amount { display: flex; align-items: center; gap: 8px; margin: 14px 0 12px; flex-wrap: wrap; }
+.amount > .btn { width: 48px; height: 48px; padding: 0; font-size: 22px; }
+.amount-val { display: flex; align-items: baseline; gap: 4px; border-bottom: 2px solid var(--ink); }
+.amount-val input { width: 92px; border: 0; background: transparent; font-size: 34px; text-align: right; color: var(--ink); padding: 2px 0; }
+.amount-val input:focus { outline: none; }
+.amount-val span { color: var(--muted); }
+.amount-kcal { margin-left: auto; text-align: right; }
+.amount-kcal b { font-size: 34px; font-weight: 600; }
+.portion-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.portion-btns .chip { border: 2px solid var(--ink); }
+.recent { display: flex; align-items: stretch; border-bottom: 1px solid var(--hair); }
+.recent-main { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 2px; background: none; border: 0; color: var(--ink); cursor: pointer; text-align: left; }
+.recent-main:hover { background: var(--card2); }
+.recent-add { flex: none; width: 46px; border: 0; border-left: 1px solid var(--hair); background: none; color: var(--ink); font-size: 20px; cursor: pointer; transition: background .15s, color .15s; }
+.recent-add:hover, .recent-add:active { background: var(--area, var(--accent)); color: var(--on-area, var(--on-accent)); }
+.flash { margin-top: 10px; padding: 8px 12px; background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 600; animation: rise .2s both; }
+.kcal-left { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.kcal-left .big { font-family: var(--mono); font-weight: 600; }
