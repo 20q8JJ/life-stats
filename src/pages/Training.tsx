@@ -4,7 +4,8 @@ import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Too
 import { CountUp } from '../anim'
 import ConfirmButton from '../ConfirmButton'
 import {
-  bestOf, exerciseKind, fmtSecs, fmtSet, parseHevy, setCount, thisWeek, useWorkouts, volume, workSets, type Workout,
+  bestOf, exerciseKind, fmtSecs, fmtSet, loadLabel, parseHevy, setCount, sportSummary, thisWeek, useWorkouts, volume, workSets,
+  VOLLEYBALL_MUSCLES, type SportLog, type Workout,
 } from '../workouts'
 
 const fmtDay = (iso: string) =>
@@ -73,11 +74,16 @@ export default function Training() {
   const week = thisWeek(workouts)
   const totalVol = workouts.reduce((a, w) => a + volume(w), 0)
   const list = [...workouts].reverse()
+  const vb = workouts.filter((w) => w.sport?.kind === 'volleyball')
+  const vbWeek = thisWeek(vb).length
+  const vbMinutes = vb.reduce((a, w) => a + (w.sport?.minutes ?? 0), 0)
+  const vbSets = vb.reduce((a, w) => a + (w.sport?.sets ?? 0), 0)
+  const vbGames = vb.reduce((a, w) => a + (w.sport?.games ?? 0), 0)
 
   return (
     <div className="page">
       <h1>Training</h1>
-      <p className="sub">Workout in Hevy teilen, Text kopieren und hier einfügen. Den Rest erkennt die App.</p>
+      <p className="sub">Workout in Hevy teilen, Text kopieren und hier einfügen. Den Rest erkennt die App. Volleyball trägst du direkt darunter ein.</p>
 
       <div className="card">
         <div className="row between"><h2>Workout einfügen</h2><button className="link" onClick={paste}>Aus Zwischenablage</button></div>
@@ -110,6 +116,8 @@ export default function Training() {
         {flash && <div className="all-done" style={{ marginTop: 10 }}>{flash}</div>}
       </div>
 
+      <VolleyballCard save={saveWorkout} />
+
       {workouts.length > 0 && (
         <>
           <div className="card">
@@ -121,7 +129,19 @@ export default function Training() {
             </div>
           </div>
 
-          <div className="card">
+          {vb.length > 0 && (
+            <div className="card">
+              <h2>🏐 Volleyball</h2>
+              <div className="grid">
+                <div className="stat"><div className="label">Diese Woche</div><div className="value"><CountUp value={vbWeek} /> <span className="small muted">Einheiten</span></div></div>
+                <div className="stat"><div className="label">Spielzeit</div><div className="value"><CountUp value={Math.round(vbMinutes / 6) / 10} decimals={1} /> <span className="small muted">h</span></div></div>
+                <div className="stat"><div className="label">Sätze</div><div className="value"><CountUp value={vbSets} /></div></div>
+                <div className="stat"><div className="label">Spiele</div><div className="value"><CountUp value={vbGames} /></div></div>
+              </div>
+            </div>
+          )}
+
+          {exerciseNames.length > 0 && <div className="card">
             <h2>Fortschritt pro Übung</h2>
             <div className="tabs">
               {exerciseNames.map((n) => (
@@ -147,7 +167,7 @@ export default function Training() {
                 </ResponsiveContainer>
               </div>
             )}
-          </div>
+          </div>}
 
           <div className="card">
             <h2>Workouts pro Woche</h2>
@@ -180,12 +200,29 @@ function WorkoutRow({ w, open, toggle, remove }: { w: Workout; open: boolean; to
       <div className="row between" onClick={toggle} style={{ cursor: 'pointer', padding: '10px 0' }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ overflowWrap: 'anywhere' }}>{w.title}</div>
-          <div className="small muted">{fmtDay(w.date)} · {fmtTime(w.date)} · {w.exercises.length} Übungen · {setCount(w)} Sätze{vol ? ` · ${Math.round(vol).toLocaleString('de-DE')} kg` : ''}</div>
+          <div className="small muted">
+            {fmtDay(w.date)} · {fmtTime(w.date)} · {w.sport
+              ? sportSummary(w.sport) || (w.sport.mode === 'match' ? 'Spiel' : 'Training')
+              : `${w.exercises.length} Übungen · ${setCount(w)} Sätze${vol ? ` · ${Math.round(vol).toLocaleString('de-DE')} kg` : ''}`}
+          </div>
         </div>
         <span className="muted" style={{ transition: 'transform .2s', transform: open ? 'rotate(90deg)' : 'none' }}>›</span>
       </div>
       {open && (
         <div className="wo-detail">
+          {w.sport && (
+            <div style={{ marginBottom: 10 }}>
+              {w.sport.muscles.length > 0 && (
+                <>
+                  <div className="small"><b>Belastete Muskeln</b></div>
+                  <div className="row wrap" style={{ gap: 6, margin: '4px 0 8px' }}>
+                    {w.sport.muscles.map((m) => <span key={m} className="pill">{m}</span>)}
+                  </div>
+                </>
+              )}
+              {w.sport.note && <div className="small" style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{w.sport.note}</div>}
+            </div>
+          )}
           {w.exercises.map((e) => (
             <div key={e.name} style={{ marginBottom: 10 }}>
               <div className="small"><b>{e.name}</b></div>
@@ -199,6 +236,130 @@ function WorkoutRow({ w, open, toggle, remove }: { w: Workout; open: boolean; to
             <ConfirmButton onConfirm={remove} label="Löschen" />
           </div>
         </div>
+      )}
+    </div>
+  )
+}
+
+const nowLocal = () => {
+  const n = new Date()
+  const z = (x: number) => String(x).padStart(2, '0')
+  return `${n.getFullYear()}-${z(n.getMonth() + 1)}-${z(n.getDate())}T${z(n.getHours())}:${z(n.getMinutes())}`
+}
+const num = (v: string) => {
+  const n = Math.round(Number(v.replace(',', '.')))
+  return Number.isFinite(n) && n > 0 ? n : undefined
+}
+
+function VolleyballCard({ save }: { save: (w: Omit<Workout, 'id'>) => boolean }) {
+  const [openForm, setOpenForm] = useState(false)
+  const [mode, setMode] = useState<SportLog['mode']>('training')
+  const [measure, setMeasure] = useState<'time' | 'count'>('time')
+  const [date, setDate] = useState(nowLocal)
+  const [minutes, setMinutes] = useState('')
+  const [sets, setSets] = useState('')
+  const [games, setGames] = useState('')
+  const [muscles, setMuscles] = useState<string[]>(() => VOLLEYBALL_MUSCLES.map((m) => m.name))
+  const [note, setNote] = useState('')
+  const [flash, setFlash] = useState('')
+
+  const m = measure === 'time' ? num(minutes) : undefined
+  const st = measure === 'count' ? num(sets) : undefined
+  const g = measure === 'count' ? num(games) : undefined
+  const ok = !!(m || st || g || note.trim())
+
+  const toggle = (name: string) => setMuscles((cur) => (cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]))
+
+  const submit = () => {
+    if (!ok) return
+    const sport: SportLog = { kind: 'volleyball', mode, muscles: VOLLEYBALL_MUSCLES.map((x) => x.name).filter((x) => muscles.includes(x)) }
+    if (m) sport.minutes = m
+    if (st) sport.sets = st
+    if (g) sport.games = g
+    if (note.trim()) sport.note = note.trim()
+    const replaced = save({ title: `Volleyball · ${mode === 'match' ? 'Spiel' : 'Training'}`, date: date || nowLocal(), exercises: [], sport })
+    setMinutes(''); setSets(''); setGames(''); setNote(''); setDate(nowLocal())
+    setFlash(replaced ? 'Volleyball aktualisiert ✓' : 'Volleyball gespeichert 🏐')
+    setTimeout(() => setFlash(''), 2500)
+  }
+
+  return (
+    <div className="card">
+      <div className="row between">
+        <h2>🏐 Volleyball eintragen</h2>
+        <button className="link" onClick={() => setOpenForm(!openForm)}>{openForm ? 'Schließen' : 'Öffnen'}</button>
+      </div>
+      {!openForm && <p className="small muted" style={{ margin: 0 }}>Training oder Spiel mit Dauer oder Sätzen/Spielen festhalten.</p>}
+      {flash && !openForm && <div className="all-done" style={{ marginTop: 10 }}>{flash}</div>}
+      {openForm && (
+        <>
+          <div className="row wrap" style={{ gap: 12, alignItems: 'flex-end', marginBottom: 12 }}>
+            <div className="tabs" style={{ margin: 0 }}>
+              <span className={`chip ${mode === 'training' ? 'on' : ''}`} onClick={() => setMode('training')}>Training</span>
+              <span className={`chip ${mode === 'match' ? 'on' : ''}`} onClick={() => setMode('match')}>Spiel</span>
+            </div>
+            <div className="field" style={{ flex: '1 1 180px' }}>
+              <label>Wann</label>
+              <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="small muted" style={{ marginBottom: 6 }}>Eintragen als</div>
+          <div className="tabs">
+            <span className={`chip ${measure === 'time' ? 'on' : ''}`} onClick={() => setMeasure('time')}>Dauer</span>
+            <span className={`chip ${measure === 'count' ? 'on' : ''}`} onClick={() => setMeasure('count')}>Sätze / Spiele</span>
+          </div>
+          {measure === 'time' ? (
+            <div className="row wrap" style={{ gap: 8, marginBottom: 12, alignItems: 'flex-end' }}>
+              <div className="field" style={{ width: 120 }}>
+                <label>Minuten</label>
+                <input inputMode="numeric" placeholder="90" value={minutes} onChange={(e) => setMinutes(e.target.value)} />
+              </div>
+              {[60, 90, 120].map((v) => (
+                <button key={v} className="btn ghost small" onClick={() => setMinutes(String(v))}>{v} min</button>
+              ))}
+            </div>
+          ) : (
+            <div className="row wrap" style={{ gap: 12, marginBottom: 12 }}>
+              <div className="field" style={{ width: 110 }}>
+                <label>Sätze</label>
+                <input inputMode="numeric" placeholder="5" value={sets} onChange={(e) => setSets(e.target.value)} />
+              </div>
+              <div className="field" style={{ width: 110 }}>
+                <label>Spiele</label>
+                <input inputMode="numeric" placeholder="2" value={games} onChange={(e) => setGames(e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          <div className="row between small" style={{ marginBottom: 6 }}>
+            <span className="muted">Belastete Muskeln (antippen zum Abwählen)</span>
+            <button className="link" onClick={() => setMuscles(muscles.length ? [] : VOLLEYBALL_MUSCLES.map((x) => x.name))}>
+              {muscles.length ? 'Keine' : 'Alle'}
+            </button>
+          </div>
+          <div className="vb-muscles">
+            {VOLLEYBALL_MUSCLES.map((x) => (
+              <button key={x.name} className={`vb-muscle ${muscles.includes(x.name) ? 'on' : ''}`} onClick={() => toggle(x.name)} title={x.why}>
+                <span>{x.name}</span>
+                <span className="vb-load" aria-label={loadLabel[x.load]}>
+                  {[1, 2, 3].map((i) => <i key={i} className={i <= x.load ? 'f' : ''} />)}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="field" style={{ marginTop: 12 }}>
+            <label>Notiz (optional)</label>
+            <textarea className="paste" style={{ minHeight: 70 }} placeholder="z. B. viel Angriff geübt, Knie etwas gemerkt" value={note} onChange={(e) => setNote(e.target.value)} />
+          </div>
+
+          <div className="row between" style={{ marginTop: 12 }}>
+            <span className="small muted">{ok ? '' : 'Trag Dauer, Sätze/Spiele oder eine Notiz ein.'}</span>
+            <button className="btn" disabled={!ok} onClick={submit}>Speichern</button>
+          </div>
+          {flash && <div className="all-done" style={{ marginTop: 10 }}>{flash}</div>}
+        </>
       )}
     </div>
   )
